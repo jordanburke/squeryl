@@ -362,6 +362,16 @@ class Schema(implicit val fieldMapper: FieldMapper) {
   private [squeryl] def _addTableType(typeT: Class[_], t: Table[_]) =
     _tableTypes += ((typeT, t))
 
+  protected def view[T]()(implicit manifestT: Manifest[T], ked: OptionalKeyedEntityDef[T,_]): View[T] = {
+    val typeT = manifestT.erasure.asInstanceOf[Class[T]]
+    new View[T](tableNameFromClass(manifestT.erasure), typeT, this, None, ked.keyedEntityDef)
+  }
+
+  protected def view[T](name: String, prefix: String)(implicit manifestT: Manifest[T], ked: OptionalKeyedEntityDef[T,_]): View[T] = {
+    val typeT = manifestT.erasure.asInstanceOf[Class[T]]
+    new View[T](name, typeT, this, Some(prefix), ked.keyedEntityDef)
+  }
+
   class ReferentialEvent(val eventName: String) {
     def restrict = new ReferentialActionImpl("restrict", this)
     def cascade = new ReferentialActionImpl("cascade", this)
